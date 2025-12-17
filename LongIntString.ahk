@@ -303,43 +303,46 @@ class LongIntString
         local
         prevBL:=A_BatchLines
         setBatchLines -1
-        resultString:="0"
-        ;  Remember the sign.
-        ,fIsNeg:=this._isNeg(firstLongString)
-        ,sIsNeg:=this._isNeg(secondLongString)
-        ;  Remove the sign on work strings.
-        ,ws1:=this._abs(firstLongString)
-        ,ws2:=this._abs(secondLongString)
-        ;  Compare absolute values.
-        ,absCompi:=this._stringCompare(ws1,ws2)
-        if (absCompi==1)   ;  Multiply bigger number by smaller number.
-            dummy:=ws1, ws1:=ws2, ws2:=dummy
-        loop1Count:=strLen(ws1)
-        ,loop2Count:=strLen(ws2)
-        loop % (loop1Count)    {
-            outLoopCounter:=A_Index
-            ,help:=""
-            ,rem:=0
-            loop % (loop2Count)    {
-                inLoopCounter:=A_Index
-                ,rightVal:=subStr(ws2,1-inLoopCounter,1)
-                ,leftVal:=subStr(ws1,1-outLoopCounter,1)
-                ,mulRes:=(leftVal*rightVal)+rem
-                ,rem:=mulRes//10
-                ,rest:=mod(mulRes,10)
-                ,help:=rest . help
-            }     
-            help:=rem . help  ;  Carry at the end (verify if this is correct).
-            ,zeroAdd:=outLoopCounter-1
-            loop % (zeroAdd)
-                help.="0"
-            this._makeFitLength(resultString,help)
-            ,resultString:=this._absAdd(resultString,help)
+        try  {
+            resultString:="0"
+            ;  Remember the sign.
+            ,fIsNeg:=this._isNeg(firstLongString)
+            ,sIsNeg:=this._isNeg(secondLongString)
+            ;  Remove the sign on work strings.
+            ,ws1:=this._abs(firstLongString)
+            ,ws2:=this._abs(secondLongString)
+            ;  Compare absolute values.
+            ,absCompi:=this._stringCompare(ws1,ws2)
+            if (absCompi==1)   ;  Multiply bigger number by smaller number.
+                dummy:=ws1, ws1:=ws2, ws2:=dummy
+            loop1Count:=strLen(ws1)
+            ,loop2Count:=strLen(ws2)
+            loop % (loop1Count)    {
+                outLoopCounter:=A_Index
+                ,help:=""
+                ,rem:=0
+                loop % (loop2Count)    {
+                    inLoopCounter:=A_Index
+                    ,rightVal:=subStr(ws2,1-inLoopCounter,1)
+                    ,leftVal:=subStr(ws1,1-outLoopCounter,1)
+                    ,mulRes:=(leftVal*rightVal)+rem
+                    ,rem:=mulRes//10
+                    ,rest:=mod(mulRes,10)
+                    ,help:=rest . help
+                }     
+                help:=rem . help  ;  Carry at the end (verify if this is correct).
+                ,zeroAdd:=outLoopCounter-1
+                loop % (zeroAdd)
+                    help.="0"
+                this._makeFitLength(resultString,help)
+                ,resultString:=this._absAdd(resultString,help)
+            }
+            this._removeLeadingZeros(resultString)
+            if ((fIsNeg!==sIsNeg) && resultString!=="0")
+                return "-" . resultString
+        }  finally  {
+            setBatchLines % prevBL
         }
-        this._removeLeadingZeros(resultString)
-        if ((fIsNeg!==sIsNeg) && resultString!=="0")
-            return "-" . resultString
-        setBatchLines % prevBL
         return resultString
     }
 }
