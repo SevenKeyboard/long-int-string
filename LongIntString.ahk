@@ -41,6 +41,7 @@ class LongIntString
       00985    => 985
     */
     _removeLeadingZeros(byRef longString)    {
+        local
         /*
         longString:=regExReplace(longString,"sD`a)^(-?)0+(.*)$","${1}${2}")
         if (longString=="" || longString=="-")
@@ -67,12 +68,13 @@ class LongIntString
     If either string is empty, it is treated as 0.
     */
     _stringCompare(byRef firstLongString, byRef secondLongString)    {
+        local
         this._removeLeadingZeros(firstLongString)
-        this._removeLeadingZeros(secondLongString)
-        fSize:=strLen(firstLongString)
-        sSize:=strLen(secondLongString)
-        fCh:=subStr(firstLongString,1,1)
-        sCh:=subStr(secondLongString,1,1)
+        ,this._removeLeadingZeros(secondLongString)
+        ,fSize:=strLen(firstLongString)
+        ,sSize:=strLen(secondLongString)
+        ,fCh:=subStr(firstLongString,1,1)
+        ,sCh:=subStr(secondLongString,1,1)
         if (fCh=="-" && sCh!=="-")    {
             retVal:=-1
         }  else if (sCh=="-" && fCh!=="-")    {
@@ -86,7 +88,7 @@ class LongIntString
                 retVal:=0 ;  Assume no difference until a mismatching digit is found.
                 loop % (sSize)    {
                     dig1:=subStr(firstLongString,A_Index,1)
-                    dig2:=subStr(secondLongString,A_Index,1)
+                    ,dig2:=subStr(secondLongString,A_Index,1)
                     if (dig1!==dig2)    {  ;  Found a different digit.
                         if (dig2<dig1)
                             retVal:=(fCh=="-" && sCh=="-"?-1:1)
@@ -121,28 +123,29 @@ class LongIntString
     A leading minus sign is preserved. Adds 3 extra reserve zeros.
     */
     _makeFitLength(byRef firstLongString, byRef secondLongString)    {
+        local
         this._removeLeadingZeros(firstLongString)
-        this._removeLeadingZeros(secondLongString)
-        fCh:=subStr(firstLongString,1,1)
-        sCh:=subStr(secondLongString,1,1)
+        ,this._removeLeadingZeros(secondLongString)
+        ,fCh:=subStr(firstLongString,1,1)
+        ,sCh:=subStr(secondLongString,1,1)
         ;  Remove minus first (if present). 
         if (fCh=="-")
             firstLongString:=subStr(firstLongString,2)
         if (sCh=="-")
             secondLongString:=subStr(secondLongString,2)
         ls1Size:=strLen(firstLongString)
-        ls2Size:=strLen(secondLongString)
-        maxi:=max(ls1Size,ls2Size)
+        ,ls2Size:=strLen(secondLongString)
+        ,maxi:=max(ls1Size,ls2Size)
         /*
         l1Diff:=maxi-ls1Size+3
-        l2Diff:=maxi-ls2Size+3
+        ,l2Diff:=maxi-ls2Size+3
         loop % (l1Diff)
             firstLongString:="0" firstLongString
         loop % (l2Diff)
             secondLongString:="0" secondLongString
         */
         firstLongString:=format("{:0" maxi+3 "}",firstLongString . "")
-        secondLongString:=format("{:0" maxi+3 "}",secondLongString . "")
+        ,secondLongString:=format("{:0" maxi+3 "}",secondLongString . "")
         ;  Put back the minus sign (if there was one).
         if (fCh=="-")
             firstLongString:="-" firstLongString
@@ -160,16 +163,17 @@ class LongIntString
     Internal use only; called by the public add/sub functions.
     */
     _absSub(byRef firstLongString, byRef secondLongString)    {
+        local
         rem:=0
-        resultString:=""
-        maxLength:=strLen(firstLongString)
+        ,resultString:=""
+        ,maxLength:=strLen(firstLongString)
         loop % (maxLength)    {
             value1:=subStr(firstLongString,maxLength+1-A_index,1)
-            value2:=subStr(secondLongString,maxLength+1-A_index,1)
-            sum:=value1-(value2+rem)
-            rem:=(9-sum)//10
-            erg:=mod((sum+10),10)
-            resultString:=erg . resultString
+            ,value2:=subStr(secondLongString,maxLength+1-A_index,1)
+            ,sum:=value1-(value2+rem)
+            ,rem:=(9-sum)//10
+            ,erg:=mod((sum+10),10)
+            ,resultString:=erg . resultString
         }
         return resultString
     }
@@ -179,17 +183,19 @@ class LongIntString
     Supports both positive and negative long-integer strings.
     */
     sub(firstLongString, secondLongString)    {
-        local ws1, ws2, wsResult, fIsNeg, sIsNeg, absCompi
+        local
+        prevBL:=A_BatchLines
+        setBatchLines -1
         ;  Remember the sign.
         fIsNeg:=this._isNeg(firstLongString)
-        sIsNeg:=this._isNeg(secondLongString)
+        ,sIsNeg:=this._isNeg(secondLongString)
         ;  Remove the sign on work strings.
-        ws1:=this._abs(firstLongString)
-        ws2:=this._abs(secondLongString)
+        ,ws1:=this._abs(firstLongString)
+        ,ws2:=this._abs(secondLongString)
         ;  Compare absolute values.
-        absCompi:=this._stringCompare(ws1,ws2)
+        ,absCompi:=this._stringCompare(ws1,ws2)
         ;  Make strings the same length by adding leading zeros.
-        this._makeFitLength(ws1,ws2)
+        ,this._makeFitLength(ws1,ws2)
         switch
         {
             case (!fIsNeg && sIsNeg): ;  First pos, second neg:  x - -y => (x + y)
@@ -212,6 +218,7 @@ class LongIntString
                 }
         }
         this._removeLeadingZeros(wsResult)
+        setBatchLines % prevBL
         return wsResult
     }
     ;------------------------------------------------------------
@@ -223,16 +230,17 @@ class LongIntString
     Internal use only; called by the public add/sub functions.
     */
     _absAdd(byRef firstLongString, byRef secondLongString)    {
+        local
         rem:=0
-        resultString:=""
-        maxLength:=strLen(firstLongString)
+        ,resultString:=""
+        ,maxLength:=strLen(firstLongString)
         loop % (maxLength)    {
             value1:=subStr(firstLongString,maxLength+1-A_index,1)
-            value2:=subStr(secondLongString,maxLength+1-A_index,1)
-            sum:=Value1+Value2+rem
-            erg:=mod(sum,10)
-            rem:=sum//10
-            resultString:=erg . resultString
+            ,value2:=subStr(secondLongString,maxLength+1-A_index,1)
+            ,sum:=Value1+Value2+rem
+            ,erg:=mod(sum,10)
+            ,rem:=sum//10
+            ,resultString:=erg . resultString
         }
         return resultString
     }
@@ -242,14 +250,17 @@ class LongIntString
     Supports both positive and negative values.
     */
     add(firstLongString, secondLongString)    {
+        local
+        prevBL:=A_BatchLines
+        setBatchLines -1
         ;  Remember the sign.
         fIsNeg:=this._isNeg(firstLongString)
-        sIsNeg:=this._isNeg(secondLongString)
+        ,sIsNeg:=this._isNeg(secondLongString)
         ;  Remove the sign on work strings.
-        ws1:=this._abs(firstLongString)
-        ws2:=this._abs(secondLongString)
+        ,ws1:=this._abs(firstLongString)
+        ,ws2:=this._abs(secondLongString)
         ;  Compare absolute values.
-        absCompi:=this._stringCompare(ws1,ws2)
+        ,absCompi:=this._stringCompare(ws1,ws2)
         ;  Make strings the same length by adding leading zeros.
         this._makeFitLength(ws1,ws2)
         switch
@@ -274,6 +285,7 @@ class LongIntString
                 }
         }
         this._removeLeadingZeros(wsResult)
+        setBatchLines % prevBL
         return wsResult
     }
     ;------------------------------------------------------------
@@ -282,42 +294,46 @@ class LongIntString
     Supports both positive and negative values.
     */
     mult(firstLongString, secondLongString)    {
+        local
+        prevBL:=A_BatchLines
+        setBatchLines -1
         resultString:="0"
         ;  Remember the sign.
-        fIsNeg:=this._isNeg(firstLongString)
-        sIsNeg:=this._isNeg(secondLongString)
+        ,fIsNeg:=this._isNeg(firstLongString)
+        ,sIsNeg:=this._isNeg(secondLongString)
         ;  Remove the sign on work strings.
-        ws1:=this._abs(firstLongString)
-        ws2:=this._abs(secondLongString)
+        ,ws1:=this._abs(firstLongString)
+        ,ws2:=this._abs(secondLongString)
         ;  Compare absolute values.
-        absCompi:=this._stringCompare(ws1,ws2)
+        ,absCompi:=this._stringCompare(ws1,ws2)
         if (absCompi==1)   ;  Multiply bigger number by smaller number.
             dummy:=ws1, ws1:=ws2, ws2:=dummy
         loop1Count:=strLen(ws1)
-        loop2Count:=strLen(ws2)
+        ,loop2Count:=strLen(ws2)
         loop % (loop1Count)    {
             outLoopCounter:=A_Index
-            help:=""
-            rem:=0
+            ,help:=""
+            ,rem:=0
             loop % (loop2Count)    {
                 inLoopCounter:=A_Index
-                rightVal:=subStr(ws2,1-inLoopCounter,1)
-                leftVal:=subStr(ws1,1-outLoopCounter,1)
-                mulRes:=(leftVal*rightVal)+rem
-                rem:=mulRes//10
-                rest:=mod(mulRes,10)
-                help:=rest . help
+                ,rightVal:=subStr(ws2,1-inLoopCounter,1)
+                ,leftVal:=subStr(ws1,1-outLoopCounter,1)
+                ,mulRes:=(leftVal*rightVal)+rem
+                ,rem:=mulRes//10
+                ,rest:=mod(mulRes,10)
+                ,help:=rest . help
             }     
             help:=rem . help  ;  Carry at the end (verify if this is correct).
-            zeroAdd:=outLoopCounter-1
+            ,zeroAdd:=outLoopCounter-1
             loop % (zeroAdd)
                 help.="0"
             this._makeFitLength(resultString,help)
-            resultString:=this._absAdd(resultString,help)
+            ,resultString:=this._absAdd(resultString,help)
         }
         this._removeLeadingZeros(resultString)
         if ((fIsNeg!==sIsNeg) && resultString!=="0")
             return "-" . resultString
+        setBatchLines % prevBL
         return resultString
     }
 }
