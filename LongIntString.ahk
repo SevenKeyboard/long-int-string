@@ -186,39 +186,42 @@ class LongIntString
         local
         prevBL:=A_BatchLines
         setBatchLines -1
-        ;  Remember the sign.
-        fIsNeg:=this._isNeg(firstLongString)
-        ,sIsNeg:=this._isNeg(secondLongString)
-        ;  Remove the sign on work strings.
-        ,ws1:=this._abs(firstLongString)
-        ,ws2:=this._abs(secondLongString)
-        ;  Compare absolute values.
-        ,absCompi:=this._stringCompare(ws1,ws2)
-        ;  Make strings the same length by adding leading zeros.
-        ,this._makeFitLength(ws1,ws2)
-        switch
-        {
-            case (!fIsNeg && sIsNeg): ;  First pos, second neg:  x - -y => (x + y)
-                wsResult:=this._absAdd(ws1,ws2)
-            case (fIsNeg && !sIsNeg): ;  First neg, second pos: -x - y => -(x + y)
-                wsResult:="-" . this._absAdd(ws1,ws2)
-            case (fIsNeg && sIsNeg): ;  Both negative
-                switch (absCompi)
-                {
-                    case 0:     return "0"                              ;  Same absolute value: -5 - -5 => 0 
-                    case 1:     wsResult:="-" . this._absSub(ws1,ws2)   ;  -1000 - -20 = -980 => negative
-                    case -1:    wsResult:=this._absSub(ws2,ws1)         ;  -20 - -1000 = +980 => positive
-                }
-            case (!fIsNeg && !sIsNeg): ;  Both positive                  
-                switch (absCompi)
-                {
-                    case 0:     return "0"                              ;  Same absolute value: 5 - 5 => 0
-                    case 1:     wsResult:=this._absSub(ws1,ws2)         ;  1000 - 20 = 980 => positive
-                    case -1:    wsResult:="-" . this._absSub(ws2,ws1)   ;  20 - 1000 = -980 => negative
-                }
+        try  {
+            ;  Remember the sign.
+            fIsNeg:=this._isNeg(firstLongString)
+            ,sIsNeg:=this._isNeg(secondLongString)
+            ;  Remove the sign on work strings.
+            ,ws1:=this._abs(firstLongString)
+            ,ws2:=this._abs(secondLongString)
+            ;  Compare absolute values.
+            ,absCompi:=this._stringCompare(ws1,ws2)
+            ;  Make strings the same length by adding leading zeros.
+            ,this._makeFitLength(ws1,ws2)
+            switch
+            {
+                case (!fIsNeg && sIsNeg): ;  First pos, second neg:  x - -y => (x + y)
+                    wsResult:=this._absAdd(ws1,ws2)
+                case (fIsNeg && !sIsNeg): ;  First neg, second pos: -x - y => -(x + y)
+                    wsResult:="-" . this._absAdd(ws1,ws2)
+                case (fIsNeg && sIsNeg): ;  Both negative
+                    switch (absCompi)
+                    {
+                        case 0:     return "0"                              ;  Same absolute value: -5 - -5 => 0 
+                        case 1:     wsResult:="-" . this._absSub(ws1,ws2)   ;  -1000 - -20 = -980 => negative
+                        case -1:    wsResult:=this._absSub(ws2,ws1)         ;  -20 - -1000 = +980 => positive
+                    }
+                case (!fIsNeg && !sIsNeg): ;  Both positive                  
+                    switch (absCompi)
+                    {
+                        case 0:     return "0"                              ;  Same absolute value: 5 - 5 => 0
+                        case 1:     wsResult:=this._absSub(ws1,ws2)         ;  1000 - 20 = 980 => positive
+                        case -1:    wsResult:="-" . this._absSub(ws2,ws1)   ;  20 - 1000 = -980 => negative
+                    }
+            }
+            this._removeLeadingZeros(wsResult)
+        }  finally  {
+            setBatchLines % prevBL
         }
-        this._removeLeadingZeros(wsResult)
-        setBatchLines % prevBL
         return wsResult
     }
     ;------------------------------------------------------------
@@ -253,39 +256,42 @@ class LongIntString
         local
         prevBL:=A_BatchLines
         setBatchLines -1
-        ;  Remember the sign.
-        fIsNeg:=this._isNeg(firstLongString)
-        ,sIsNeg:=this._isNeg(secondLongString)
-        ;  Remove the sign on work strings.
-        ,ws1:=this._abs(firstLongString)
-        ,ws2:=this._abs(secondLongString)
-        ;  Compare absolute values.
-        ,absCompi:=this._stringCompare(ws1,ws2)
-        ;  Make strings the same length by adding leading zeros.
-        this._makeFitLength(ws1,ws2)
-        switch
-        {
-            case (!fIsNeg && !sIsNeg): ;  Both positive => positive result
-                wsResult:=this._absAdd(ws1,ws2)
-            case (fIsNeg && sIsNeg): ;  Both negative => negative result
-                wsResult:="-" . this._absAdd(ws1,ws2)
-            case (fIsNeg && !sIsNeg): ;  First negative, second positive
-                switch (absCompi)
-                {
-                    case 0:     return "0"                              ;  -5 + 5 => 0
-                    case 1:     wsResult:="-" . this._absSub(ws1,ws2)   ;  -1000 + 20 = -980 => negative
-                    case -1:    wsResult:=this._absSub(ws2,ws1)         ;  -20 + 1000 = +980 => positive
-                }
-            case (!fIsNeg && sIsNeg): ;  First positive, second negative
-                switch (absCompi)
-                {
-                    case 0:     return "0"                              ;  5 + -5 => 0
-                    case 1:     wsResult:=this._absSub(ws1,ws2)         ;  1000 + -20 = 980 => positive
-                    case -1:    wsResult:="-" . this._absSub(ws2,ws1)   ;  20 + -1000 = -980 => negative
-                }
+        try  {
+            ;  Remember the sign.
+            fIsNeg:=this._isNeg(firstLongString)
+            ,sIsNeg:=this._isNeg(secondLongString)
+            ;  Remove the sign on work strings.
+            ,ws1:=this._abs(firstLongString)
+            ,ws2:=this._abs(secondLongString)
+            ;  Compare absolute values.
+            ,absCompi:=this._stringCompare(ws1,ws2)
+            ;  Make strings the same length by adding leading zeros.
+            this._makeFitLength(ws1,ws2)
+            switch
+            {
+                case (!fIsNeg && !sIsNeg): ;  Both positive => positive result
+                    wsResult:=this._absAdd(ws1,ws2)
+                case (fIsNeg && sIsNeg): ;  Both negative => negative result
+                    wsResult:="-" . this._absAdd(ws1,ws2)
+                case (fIsNeg && !sIsNeg): ;  First negative, second positive
+                    switch (absCompi)
+                    {
+                        case 0:     return "0"                              ;  -5 + 5 => 0
+                        case 1:     wsResult:="-" . this._absSub(ws1,ws2)   ;  -1000 + 20 = -980 => negative
+                        case -1:    wsResult:=this._absSub(ws2,ws1)         ;  -20 + 1000 = +980 => positive
+                    }
+                case (!fIsNeg && sIsNeg): ;  First positive, second negative
+                    switch (absCompi)
+                    {
+                        case 0:     return "0"                              ;  5 + -5 => 0
+                        case 1:     wsResult:=this._absSub(ws1,ws2)         ;  1000 + -20 = 980 => positive
+                        case -1:    wsResult:="-" . this._absSub(ws2,ws1)   ;  20 + -1000 = -980 => negative
+                    }
+            }
+            this._removeLeadingZeros(wsResult)
+        }  finally  {
+            setBatchLines % prevBL
         }
-        this._removeLeadingZeros(wsResult)
-        setBatchLines % prevBL
         return wsResult
     }
     ;------------------------------------------------------------
