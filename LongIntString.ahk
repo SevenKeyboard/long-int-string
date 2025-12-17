@@ -228,7 +228,7 @@ class LongIntString
         loop (maxLength)    {
             value1:=subStr(firstLongString,maxLength+1-A_index,1)
             ,value2:=subStr(secondLongString,maxLength+1-A_index,1)
-            ,sum:=Value1+Value2+rem
+            ,sum:=value1+Value2+rem
             ,erg:=mod(sum,10)
             ,rem:=sum//10
             ,resultString:=erg . resultString
